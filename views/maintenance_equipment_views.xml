@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Equipment Category Views -->
+    <record id="maintenance_equipment_category_view_form" model="ir.ui.view">
+        <field name="name">maintenance.equipment.category.view.form</field>
+        <field name="model">maintenance.equipment.category</field>
+        <field name="arch" type="xml">
+            <form string="Equipment Category">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="color" widget="color_picker"/>
+                        </group>
+                        <group>
+                            <field name="equipment_count"/>
+                        </group>
+                    </group>
+                    <group string="Notes">
+                        <field name="note" nolabel="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+    <record id="maintenance_equipment_category_view_tree" model="ir.ui.view">
+        <field name="name">maintenance.equipment.category.view.tree</field>
+        <field name="model">maintenance.equipment.category</field>
+        <field name="arch" type="xml">
+            <tree string="Equipment Categories">
+                <field name="name"/>
+                <field name="equipment_count"/>
+            </tree>
+        </field>
+    </record>
+    
+    <record id="maintenance_equipment_category_action" model="ir.actions.act_window">
+        <field name="name">Equipment Categories</field>
+        <field name="res_model">maintenance.equipment.category</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create equipment categories
+            </p>
+            <p>
+                Categorize your equipment (e.g., Machines, Vehicles, Computers).
+            </p>
+        </field>
+    </record>
+    
+    <!-- Equipment Form View -->
+    <record id="maintenance_equipment_view_form" model="ir.ui.view">
+        <field name="name">maintenance.equipment.view.form</field>
+        <field name="model">maintenance.equipment</field>
+        <field name="arch" type="xml">
+            <form string="Equipment">
+                <header>
+                    <button name="action_set_scrap" type="object" string="Scrap Equipment" 
+                            class="btn-danger" invisible="is_scrap"
+                            confirm="Are you sure you want to scrap this equipment? This action cannot be undone."/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <!-- Smart Button for Maintenance Requests -->
+                        <button name="action_view_maintenance_requests" type="object" 
+                                class="oe_stat_button" icon="fa-wrench">
+                            <field name="maintenance_open_count" widget="statinfo" string="Maintenance"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Archived" bg_color="bg-danger" 
+                            invisible="active"/>
+                    <widget name="web_ribbon" title="Scrapped" bg_color="bg-warning" 
+                            invisible="not is_scrap"/>
+                    <field name="image" widget="image" class="oe_avatar" 
+                           options="{'preview_image': 'image'}"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Equipment Name..."/>
+                        </h1>
+                        <field name="category_id" placeholder="Category" 
+                               options="{'no_create_edit': True}"/>
+                    </div>
+                    <group>
+                        <group string="General Information">
+                            <field name="serial_no"/>
+                            <field name="model"/>
+                            <field name="location"/>
+                            <field name="active" invisible="1"/>
+                            <field name="is_scrap" invisible="1"/>
+                        </group>
+                        <group string="Ownership">
+                            <field name="department_id"/>
+                            <field name="employee_id"/>
+                            <field name="owner_user_id" widget="many2one_avatar_user"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Purchase &amp; Warranty">
+                            <field name="purchase_date"/>
+                            <field name="purchase_value" widget="monetary" 
+                                   options="{'currency_field': 'company_id'}"/>
+                            <field name="warranty_period"/>
+                            <field name="warranty_date"/>
+                            <field name="is_warranty_valid" widget="boolean_toggle"/>
+                        </group>
+                        <group string="Maintenance Assignment">
+                            <field name="maintenance_team_id"/>
+                            <field name="technician_user_id" widget="many2one_avatar_user"
+                                   domain="[('id', 'in', team_member_ids)]"/>
+                            <field name="team_member_ids" invisible="1"/>
+                            <field name="next_maintenance_date"/>
+                        </group>
+                    </group>
+                    <group string="Scrap Information" invisible="not is_scrap">
+                        <field name="scrap_date"/>
+                    </group>
+                    <notebook>
+                        <page string="Notes" name="notes">
+                            <field name="note" placeholder="Add notes and technical details..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Equipment Tree View -->
+    <record id="maintenance_equipment_view_tree" model="ir.ui.view">
+        <field name="name">maintenance.equipment.view.tree</field>
+        <field name="model">maintenance.equipment</field>
+        <field name="arch" type="xml">
+            <tree string="Equipment" multi_edit="1">
+                <field name="name"/>
+                <field name="serial_no"/>
+                <field name="category_id"/>
+                <field name="department_id" optional="show"/>
+                <field name="employee_id" optional="show"/>
+                <field name="location" optional="show"/>
+                <field name="maintenance_team_id"/>
+                <field name="technician_user_id" widget="many2one_avatar_user"/>
+                <field name="warranty_date" optional="hide"/>
+                <field name="is_warranty_valid" widget="boolean" optional="hide"/>
+                <field name="maintenance_open_count" string="Open Requests"/>
+                <field name="is_scrap" optional="hide"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Equipment Kanban View -->
+    <record id="maintenance_equipment_view_kanban" model="ir.ui.view">
+        <field name="name">maintenance.equipment.view.kanban</field>
+        <field name="model">maintenance.equipment</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile">
+                <field name="name"/>
+                <field name="serial_no"/>
+                <field name="category_id"/>
+                <field name="maintenance_team_id"/>
+                <field name="technician_user_id"/>
+                <field name="maintenance_open_count"/>
+                <field name="is_scrap"/>
+                <field name="color"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="ribbon ribbon-top-right" t-if="record.is_scrap.raw_value">
+                            <span class="bg-warning">Scrapped</span>
+                        </div>
+                        <div class="ribbon ribbon-top-right" t-elif="record.maintenance_open_count.raw_value > 0">
+                            <span class="bg-danger"><field name="maintenance_open_count"/> Issues</span>
+                        </div>
+                        <field name="name" class="fw-bold fs-5"/>
+                        <div class="text-muted">
+                            <field name="serial_no"/> | <field name="category_id"/>
+                        </div>
+                        <hr class="mt-1 mb-1"/>
+                        <div class="row">
+                            <div class="col-6">
+                                <span class="text-muted">Team:</span>
+                                <field name="maintenance_team_id"/>
+                            </div>
+                            <div class="col-6">
+                                <field name="technician_user_id" widget="many2one_avatar_user"/>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Equipment Search View -->
+    <record id="maintenance_equipment_view_search" model="ir.ui.view">
+        <field name="name">maintenance.equipment.view.search</field>
+        <field name="model">maintenance.equipment</field>
+        <field name="arch" type="xml">
+            <search string="Search Equipment">
+                <field name="name"/>
+                <field name="serial_no"/>
+                <field name="category_id"/>
+                <field name="department_id"/>
+                <field name="employee_id"/>
+                <field name="maintenance_team_id"/>
+                <field name="technician_user_id"/>
+                <field name="location"/>
+                <separator/>
+                <filter string="Under Warranty" name="warranty_valid"
+                        domain="[('is_warranty_valid', '=', True)]"/>
+                <filter string="Warranty Expired" name="warranty_expired"
+                        domain="[('is_warranty_valid', '=', False), ('warranty_date', '!=', False)]"/>
+                <filter string="Scrapped" name="scrapped"
+                        domain="[('is_scrap', '=', True)]"/>
+                <filter string="Archived" name="inactive"
+                        domain="[('active', '=', False)]"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter string="Category" name="group_category"
+                            context="{'group_by': 'category_id'}"/>
+                    <filter string="Department" name="group_department"
+                            context="{'group_by': 'department_id'}"/>
+                    <filter string="Employee" name="group_employee"
+                            context="{'group_by': 'employee_id'}"/>
+                    <filter string="Maintenance Team" name="group_team"
+                            context="{'group_by': 'maintenance_team_id'}"/>
+                    <filter string="Technician" name="group_technician"
+                            context="{'group_by': 'technician_user_id'}"/>
+                    <filter string="Location" name="group_location"
+                            context="{'group_by': 'location'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Equipment Action -->
+    <record id="maintenance_equipment_action" model="ir.actions.act_window">
+        <field name="name">Equipment</field>
+        <field name="res_model">maintenance.equipment</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="search_view_id" ref="maintenance_equipment_view_search"/>
+        <field name="context">{'search_default_group_category': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Add your first equipment
+            </p>
+            <p>
+                Track all your company assets - machines, vehicles, computers, and more.
+            </p>
+        </field>
+    </record>
+
+</odoo>

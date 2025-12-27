@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Maintenance Stage Views -->
+    <record id="maintenance_stage_view_form" model="ir.ui.view">
+        <field name="name">maintenance.stage.view.form</field>
+        <field name="model">maintenance.stage</field>
+        <field name="arch" type="xml">
+            <form string="Maintenance Stage">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="sequence"/>
+                        </group>
+                        <group>
+                            <field name="fold"/>
+                            <field name="done"/>
+                            <field name="is_scrap"/>
+                        </group>
+                    </group>
+                    <group string="Description">
+                        <field name="description" nolabel="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+    <record id="maintenance_stage_view_tree" model="ir.ui.view">
+        <field name="name">maintenance.stage.view.tree</field>
+        <field name="model">maintenance.stage</field>
+        <field name="arch" type="xml">
+            <tree string="Maintenance Stages">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="fold"/>
+                <field name="done"/>
+                <field name="is_scrap"/>
+            </tree>
+        </field>
+    </record>
+    
+    <record id="maintenance_stage_action" model="ir.actions.act_window">
+        <field name="name">Maintenance Stages</field>
+        <field name="res_model">maintenance.stage</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create maintenance workflow stages
+            </p>
+        </field>
+    </record>
+    
+    <!-- Maintenance Request Form View -->
+    <record id="maintenance_request_view_form" model="ir.ui.view">
+        <field name="name">maintenance.request.view.form</field>
+        <field name="model">maintenance.request</field>
+        <field name="arch" type="xml">
+            <form string="Maintenance Request">
+                <header>
+                    <button name="action_assign_to_me" type="object" string="Assign to Me" 
+                            class="btn-secondary" invisible="technician_id"/>
+                    <button name="action_start" type="object" string="Start Work" 
+                            class="btn-primary" invisible="stage_id.sequence != 1"/>
+                    <button name="action_done" type="object" string="Mark as Done" 
+                            class="btn-success" invisible="stage_id.done"/>
+                    <button name="action_scrap" type="object" string="Scrap Equipment" 
+                            class="btn-danger" invisible="stage_id.is_scrap"
+                            confirm="Scrapping will mark the equipment as no longer usable. Continue?"/>
+                    <field name="stage_id" widget="statusbar" options="{'clickable': '1'}"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Overdue" bg_color="bg-danger" 
+                            invisible="not is_overdue"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Subject (e.g., Leaking Oil)..."/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Request Details">
+                            <field name="request_type" widget="radio"/>
+                            <field name="priority" widget="priority"/>
+                            <field name="equipment_id"/>
+                            <field name="category_id"/>
+                            <field name="equipment_serial"/>
+                        </group>
+                        <group string="Assignment">
+                            <field name="maintenance_team_id"/>
+                            <field name="team_member_ids" invisible="1"/>
+                            <field name="technician_id" widget="many2one_avatar_user"
+                                   domain="[('id', 'in', team_member_ids)]"/>
+                            <field name="user_id" widget="many2one_avatar_user" readonly="1"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Scheduling">
+                            <field name="request_date"/>
+                            <field name="schedule_date"/>
+                            <field name="close_date" invisible="not stage_id.done"/>
+                        </group>
+                        <group string="Time Tracking">
+                            <field name="duration" widget="float_time"/>
+                            <field name="is_overdue" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Description" name="description">
+                            <field name="description" placeholder="Describe the issue or maintenance work in detail..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Maintenance Request Tree View -->
+    <record id="maintenance_request_view_tree" model="ir.ui.view">
+        <field name="name">maintenance.request.view.tree</field>
+        <field name="model">maintenance.request</field>
+        <field name="arch" type="xml">
+            <tree string="Maintenance Requests" multi_edit="1" 
+                  decoration-danger="is_overdue" decoration-muted="stage_id.done">
+                <field name="name"/>
+                <field name="equipment_id"/>
+                <field name="category_id" optional="show"/>
+                <field name="request_type"/>
+                <field name="maintenance_team_id"/>
+                <field name="technician_id" widget="many2one_avatar_user"/>
+                <field name="schedule_date"/>
+                <field name="duration" widget="float_time" optional="show"/>
+                <field name="stage_id" widget="badge" 
+                       decoration-success="done" decoration-info="not done"/>
+                <field name="priority" widget="priority" optional="show"/>
+                <field name="is_overdue" column_invisible="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Maintenance Request Kanban View - Primary workspace for technicians -->
+    <record id="maintenance_request_view_kanban" model="ir.ui.view">
+        <field name="name">maintenance.request.view.kanban</field>
+        <field name="model">maintenance.request</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="stage_id" class="o_kanban_small_column o_kanban_mobile"
+                    quick_create="false" on_create="quick_create">
+                <field name="name"/>
+                <field name="equipment_id"/>
+                <field name="category_id"/>
+                <field name="request_type"/>
+                <field name="maintenance_team_id"/>
+                <field name="technician_id"/>
+                <field name="schedule_date"/>
+                <field name="stage_id"/>
+                <field name="priority"/>
+                <field name="is_overdue"/>
+                <field name="color"/>
+                <field name="kanban_state"/>
+                <progressbar field="kanban_state" colors='{"done": "success", "blocked": "danger", "normal": "muted"}'/>
+                <templates>
+                    <t t-name="card" class="flex-row">
+                        <!-- Red strip for overdue requests -->
+                        <aside t-if="record.is_overdue.raw_value" class="bg-danger" style="width: 5px;"/>
+                        <main class="flex-grow-1">
+                            <div class="o_kanban_record_top mb-0">
+                                <div class="o_kanban_record_headings mt-0">
+                                    <strong class="o_kanban_record_title">
+                                        <field name="name"/>
+                                    </strong>
+                                </div>
+                                <field name="priority" widget="priority"/>
+                            </div>
+                            <div class="o_kanban_record_body">
+                                <div class="text-muted">
+                                    <field name="equipment_id"/>
+                                </div>
+                                <div t-if="record.schedule_date.raw_value" class="text-muted small">
+                                    <i class="fa fa-calendar"/> <field name="schedule_date"/>
+                                </div>
+                                <span t-if="record.request_type.raw_value == 'preventive'"
+                                      class="badge rounded-pill text-bg-info">Preventive</span>
+                                <span t-if="record.request_type.raw_value == 'corrective'"
+                                      class="badge rounded-pill text-bg-warning">Corrective</span>
+                                <span t-if="record.is_overdue.raw_value"
+                                      class="badge rounded-pill text-bg-danger">Overdue</span>
+                            </div>
+                            <div class="o_kanban_record_bottom">
+                                <div class="oe_kanban_bottom_left">
+                                    <field name="maintenance_team_id"/>
+                                </div>
+                                <div class="oe_kanban_bottom_right">
+                                    <!-- Technician avatar -->
+                                    <field name="technician_id" widget="many2one_avatar_user"/>
+                                </div>
+                            </div>
+                        </main>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Maintenance Request Calendar View - For preventive maintenance -->
+    <record id="maintenance_request_view_calendar" model="ir.ui.view">
+        <field name="name">maintenance.request.view.calendar</field>
+        <field name="model">maintenance.request</field>
+        <field name="arch" type="xml">
+            <calendar string="Maintenance Schedule" date_start="schedule_date"
+                      color="maintenance_team_id" mode="month" event_open_popup="true"
+                      quick_create="true" quick_create_view_id="%(maintenance_request_view_form_quick)d">
+                <field name="name"/>
+                <field name="equipment_id"/>
+                <field name="technician_id" widget="many2one_avatar_user"/>
+                <field name="request_type"/>
+            </calendar>
+        </field>
+    </record>
+
+    <!-- Quick Create Form for Calendar -->
+    <record id="maintenance_request_view_form_quick" model="ir.ui.view">
+        <field name="name">maintenance.request.view.form.quick</field>
+        <field name="model">maintenance.request</field>
+        <field name="priority">1000</field>
+        <field name="arch" type="xml">
+            <form string="Quick Maintenance Request">
+                <group>
+                    <field name="name" placeholder="Subject..."/>
+                    <field name="equipment_id"/>
+                    <field name="request_type"/>
+                    <field name="maintenance_team_id"/>
+                    <field name="schedule_date"/>
+                </group>
+            </form>
+        </field>
+    </record>
+
+    <!-- Maintenance Request Search View -->
+    <record id="maintenance_request_view_search" model="ir.ui.view">
+        <field name="name">maintenance.request.view.search</field>
+        <field name="model">maintenance.request</field>
+        <field name="arch" type="xml">
+            <search string="Search Maintenance Requests">
+                <field name="name"/>
+                <field name="equipment_id"/>
+                <field name="category_id"/>
+                <field name="maintenance_team_id"/>
+                <field name="technician_id"/>
+                <separator/>
+                <filter string="My Requests" name="my_requests"
+                        domain="[('technician_id', '=', uid)]"/>
+                <filter string="My Team" name="my_team"
+                        domain="[('maintenance_team_id.member_ids', 'in', [uid])]"/>
+                <separator/>
+                <filter string="Corrective (Breakdown)" name="corrective"
+                        domain="[('request_type', '=', 'corrective')]"/>
+                <filter string="Preventive (Routine)" name="preventive"
+                        domain="[('request_type', '=', 'preventive')]"/>
+                <separator/>
+                <filter string="Open" name="open"
+                        domain="[('stage_id.done', '=', False)]"/>
+                <filter string="Done" name="done"
+                        domain="[('stage_id.done', '=', True)]"/>
+                <filter string="Overdue" name="overdue"
+                        domain="[('is_overdue', '=', True)]"/>
+                <separator/>
+                <filter string="Scheduled Today" name="today"
+                        domain="[('schedule_date', '>=', datetime.datetime.combine(context_today(), datetime.time(0,0,0))),
+                                 ('schedule_date', '&lt;=', datetime.datetime.combine(context_today(), datetime.time(23,59,59)))]"/>
+                <filter string="Scheduled This Week" name="this_week"
+                        domain="[('schedule_date', '>=', (context_today() + relativedelta(weeks=-1, weekday=0)).strftime('%Y-%m-%d')),
+                                 ('schedule_date', '&lt;', (context_today() + relativedelta(weeks=0, weekday=6)).strftime('%Y-%m-%d 23:59:59'))]"/>
+                <separator/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Stage" name="group_stage" context="{'group_by': 'stage_id'}"/>
+                    <filter string="Equipment" name="group_equipment" context="{'group_by': 'equipment_id'}"/>
+                    <filter string="Category" name="group_category" context="{'group_by': 'category_id'}"/>
+                    <filter string="Maintenance Team" name="group_team" context="{'group_by': 'maintenance_team_id'}"/>
+                    <filter string="Technician" name="group_technician" context="{'group_by': 'technician_id'}"/>
+                    <filter string="Type" name="group_type" context="{'group_by': 'request_type'}"/>
+                    <filter string="Scheduled Date" name="group_schedule" context="{'group_by': 'schedule_date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Maintenance Request Actions -->
+    <record id="maintenance_request_action" model="ir.actions.act_window">
+        <field name="name">Maintenance Requests</field>
+        <field name="res_model">maintenance.request</field>
+        <field name="view_mode">kanban,tree,form,calendar,pivot,graph</field>
+        <field name="search_view_id" ref="maintenance_request_view_search"/>
+        <field name="context">{'search_default_open': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new maintenance request
+            </p>
+            <p>
+                Track all maintenance work - from breakdowns to routine checkups.
+            </p>
+        </field>
+    </record>
+
+    <record id="maintenance_request_action_calendar" model="ir.actions.act_window">
+        <field name="name">Maintenance Schedule</field>
+        <field name="res_model">maintenance.request</field>
+        <field name="view_mode">calendar,kanban,tree,form</field>
+        <field name="search_view_id" ref="maintenance_request_view_search"/>
+        <field name="context">{'search_default_preventive': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Schedule preventive maintenance
+            </p>
+            <p>
+                Plan routine checkups and maintenance activities.
+            </p>
+        </field>
+    </record>
+
+</odoo>

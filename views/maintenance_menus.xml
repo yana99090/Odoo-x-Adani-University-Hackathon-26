@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Root Menu -->
+    <menuitem id="maintenance_menu_root"
+              name="GearGuard"
+              web_icon="gearguard,static/description/icon.png"
+              sequence="50"/>
+    
+    <!-- Operations Menu -->
+    <menuitem id="maintenance_menu_operations"
+              name="Operations"
+              parent="maintenance_menu_root"
+              sequence="10"/>
+    
+    <menuitem id="maintenance_menu_request"
+              name="Maintenance Requests"
+              parent="maintenance_menu_operations"
+              action="maintenance_request_action"
+              sequence="10"/>
+    
+    <menuitem id="maintenance_menu_schedule"
+              name="Maintenance Schedule"
+              parent="maintenance_menu_operations"
+              action="maintenance_request_action_calendar"
+              sequence="20"/>
+    
+    <!-- Equipment Menu -->
+    <menuitem id="maintenance_menu_equipment"
+              name="Equipment"
+              parent="maintenance_menu_root"
+              sequence="20"/>
+    
+    <menuitem id="maintenance_menu_equipment_all"
+              name="All Equipment"
+              parent="maintenance_menu_equipment"
+              action="maintenance_equipment_action"
+              sequence="10"/>
+    
+    <menuitem id="maintenance_menu_equipment_categories"
+              name="Equipment Categories"
+              parent="maintenance_menu_equipment"
+              action="maintenance_equipment_category_action"
+              sequence="20"/>
+    
+    <!-- Teams Menu -->
+    <menuitem id="maintenance_menu_teams"
+              name="Teams"
+              parent="maintenance_menu_root"
+              sequence="30"/>
+    
+    <menuitem id="maintenance_menu_teams_all"
+              name="Maintenance Teams"
+              parent="maintenance_menu_teams"
+              action="maintenance_team_action"
+              sequence="10"/>
+    
+    <!-- Reporting Menu -->
+    <menuitem id="maintenance_menu_reporting"
+              name="Reporting"
+              parent="maintenance_menu_root"
+              sequence="40"/>
+    
+    <menuitem id="maintenance_menu_report_analysis"
+              name="Maintenance Analysis"
+              parent="maintenance_menu_reporting"
+              action="maintenance_request_report_action"
+              sequence="10"/>
+    
+    <menuitem id="maintenance_menu_report_team"
+              name="Requests by Team"
+              parent="maintenance_menu_reporting"
+              action="maintenance_request_report_team_action"
+              sequence="20"/>
+    
+    <menuitem id="maintenance_menu_report_category"
+              name="Requests by Category"
+              parent="maintenance_menu_reporting"
+              action="maintenance_request_report_category_action"
+              sequence="30"/>
+    
+    <!-- Configuration Menu -->
+    <menuitem id="maintenance_menu_configuration"
+              name="Configuration"
+              parent="maintenance_menu_root"
+              groups="group_gearguard_manager"
+              sequence="50"/>
+    
+    <menuitem id="maintenance_menu_config_stages"
+              name="Maintenance Stages"
+              parent="maintenance_menu_configuration"
+              action="maintenance_stage_action"
+              sequence="10"/>
+    
+</odoo>
+
