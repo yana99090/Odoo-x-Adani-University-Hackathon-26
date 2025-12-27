@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
-import { Wrench, Package, Users, BarChart3, Calendar, Settings, LogOut, User, ChevronDown, Bell, Search } from 'lucide-react'
+import { Wrench, Package, Users, BarChart3, Calendar, Settings, LogOut, User, ChevronDown } from 'lucide-react'
 import { api } from '@/lib/api'
 import { useAuth } from '@/lib/auth-context'
 
@@ -56,17 +56,6 @@ export default function Home() {
 
             {/* Right Side Actions */}
             <div className="flex items-center space-x-3">
-              {/* Search */}
-              <button className="p-2 text-secondary-600 hover:text-secondary-900 hover:bg-secondary-100 rounded-lg transition-colors">
-                <Search className="h-5 w-5" />
-              </button>
-
-              {/* Notifications */}
-              <button className="p-2 text-secondary-600 hover:text-secondary-900 hover:bg-secondary-100 rounded-lg transition-colors relative">
-                <Bell className="h-5 w-5" />
-                <span className="absolute top-1 right-1 h-2 w-2 bg-danger-500 rounded-full"></span>
-              </button>
-
               {/* User Menu */}
               <div className="relative">
                 <button

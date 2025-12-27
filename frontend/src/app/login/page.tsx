@@ -97,7 +97,7 @@ export default function LoginPage() {
         {/* Footer */}
         <div className="relative z-10">
           <p className="text-primary-200 text-sm">
-            © 2024 GearGuard. All rights reserved.
+            © 2025 GearGuard. All rights reserved.
           </p>
         </div>
       </div>
